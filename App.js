@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FontAwesome } from "@expo/vector-icons";
 import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
@@ -63,6 +65,27 @@ export default function App() {
     }
   };
 
+  const deleteToDo = (id) => {
+    try {
+      Alert.alert("Delete To Do?", "Are you sure?", [
+        { text: "Cancel" },
+        {
+          text: "I'm Sure",
+          style: "destructive", // Only in iOS
+          onPress: async () => {
+            const newToDos = { ...toDos };
+            delete newToDos[id];
+            setToDos(newToDos);
+            await saveToDos(newToDos);
+          },
+        },
+      ]);
+      return;
+    } catch (e) {
+      console.log("deleteToDo error! ==> ", e);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -100,6 +123,10 @@ export default function App() {
           toDos[key].working === working ? (
             <View key={key} style={styles.toDo}>
               <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              <TouchableOpacity onPress={() => deleteToDo(key)}>
+                {/* <Text>❌</Text> */}
+                <FontAwesome name="trash-o" size={15} color="white" />
+              </TouchableOpacity>
             </View>
           ) : null
         )}
@@ -137,6 +164,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   toDoText: {
     color: "white",
